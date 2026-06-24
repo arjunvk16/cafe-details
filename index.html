@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Food Confessional</title>
     <style>
         :root {
@@ -23,27 +23,29 @@
         * {
             box-sizing: border-box;
             transition: all 0.2s ease-in-out;
+            -webkit-tap-highlight-color: transparent; /* Removes ugly mobile flash */
         }
 
         body {
-            font-family: 'Cabinet Grotesk', 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            max-width: 750px;
+            max-width: 650px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px 15px;
             line-height: 1.5;
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            padding: 0 10px;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             background: linear-gradient(45deg, var(--accent-primary), #ff6b81);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -55,17 +57,17 @@
             color: var(--text-muted);
             font-style: italic;
             margin: 0;
+            font-size: 0.95rem;
         }
 
         .container {
             background: var(--card-bg);
-            padding: 30px;
+            padding: 20px;
             border-radius: 16px;
             border: 1px solid #334155;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
-            margin-bottom: 30px;
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.3);
+            margin-bottom: 25px;
             position: relative;
-            overflow: hidden;
         }
 
         .container::before {
@@ -75,22 +77,29 @@
             left: 0;
             width: 100%;
             height: 4px;
+            border-radius: 16px 16px 0 0;
             background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
         }
 
         form {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 16px;
+        }
+
+        .form-group {
+            position: relative; /* Crucial for the custom dropdown positioning */
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--accent-secondary);
-            margin-bottom: -8px;
         }
 
         input, textarea, select {
@@ -99,14 +108,47 @@
             padding: 14px;
             border: 2px solid #334155;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 16px; /* 16px prevents iOS from forcing an ugly auto-zoom */
             font-family: inherit;
+            width: 100%;
         }
 
         input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--accent-primary);
             box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.15);
+        }
+
+        /* CUSTOM MOBILE SUGGESTIONS DROPDOWN */
+        .suggestions-box {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 999;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+        }
+
+        .suggestion-item {
+            padding: 12px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #334155;
+            font-size: 0.95rem;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hidden-touch, .suggestion-item:hover {
+            background: #334155;
+            color: var(--accent-secondary);
         }
 
         button {
@@ -116,21 +158,16 @@
             padding: 14px;
             border-radius: 8px;
             border: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 48px; /* Safe mobile tap target size */
         }
 
         #submit-btn {
             background: linear-gradient(135deg, var(--accent-primary), #ff6b81);
             color: white;
-            box-shadow: 0 4px 14px rgba(255, 71, 87, 0.4);
-        }
-
-        #submit-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.6);
-        }
-
-        #submit-btn:active {
-            transform: translateY(0);
+            box-shadow: 0 4px 14px rgba(255, 71, 87, 0.3);
         }
 
         .cancel-edit-btn {
@@ -138,126 +175,116 @@
             color: var(--text-main);
         }
 
-        .cancel-edit-btn:hover {
-            background: #64748b;
-        }
-
         .search-bar {
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             background: var(--card-bg);
             border: 2px solid #334155;
         }
 
-        .search-bar:focus {
-            border-color: var(--accent-secondary);
-            box-shadow: 0 0 0 4px rgba(0, 210, 211, 0.15);
-        }
-
+        /* MOBILE RESPONSIVE CARDS */
         .entry-card {
             background: var(--card-bg);
             border: 1px solid #334155;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 18px;
+            margin-bottom: 15px;
             border-radius: 12px;
-            position: relative;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        .entry-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            border-color: #475569;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            gap: 12px;
         }
 
         .entry-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 15px;
+            gap: 10px;
         }
 
         .entry-title {
             margin: 0;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         .entry-place {
             color: var(--accent-secondary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
+            margin-top: 2px;
         }
 
         .entry-details {
-            margin: 5px 0 0 0;
-            font-size: 0.95rem;
+            margin: 0;
+            font-size: 0.9rem;
             color: var(--text-muted);
-            padding-right: 140px;
+            word-break: break-word; /* Prevents overflow strings breaking layout */
         }
 
-        /* Fun Badges */
         .badge {
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #fff;
             white-space: nowrap;
         }
-        .badge-excellent { background-color: var(--excellent); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
-        .badge-good { background-color: var(--good); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .badge-excellent { background-color: var(--excellent); }
+        .badge-good { background-color: var(--good); }
         .badge-average { background-color: var(--average); color: #0f172a; }
-        .badge-bad { background-color: var(--bad); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+        .badge-bad { background-color: var(--bad); }
 
-        /* Actions buttons inside cards */
+        /* Actions block sits beautifully below text on mobile */
         .card-actions {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
             display: flex;
-            gap: 8px;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 5px;
+            border-top: 1px solid #334155;
+            padding-top: 12px;
         }
 
         .edit-btn, .delete-btn {
             background: #0f172a;
             border: 1px solid #334155;
             color: var(--text-main);
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 8px 16px;
+            font-size: 13px;
             font-weight: 700;
             border-radius: 6px;
             cursor: pointer;
+            min-height: 38px;
         }
 
-        .edit-btn:hover {
-            border-color: var(--accent-secondary);
-            color: var(--accent-secondary);
-        }
-
-        .delete-btn:hover {
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-            animation: shake 0.2s ease-in-out infinite;
-        }
+        .edit-btn:active { border-color: var(--accent-secondary); color: var(--accent-secondary); }
+        .delete-btn:active { border-color: var(--accent-primary); color: var(--accent-primary); }
 
         .loader-text {
             text-align: center;
             color: var(--text-muted);
             font-style: italic;
-            padding: 40px;
+            padding: 30px;
+            font-size: 0.9rem;
         }
 
-        /* Animations */
+        /* Desktop Media Queries for enhancements */
+        @media (min-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .entry-card:hover {
+                transform: translateY(-2px);
+                border-color: #475569;
+            }
+            .edit-btn:hover { border-color: var(--accent-secondary); color: var(--accent-secondary); }
+            .delete-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); animation: shake 0.2s infinite; }
+        }
+
         @keyframes shake {
             0% { transform: rotate(0deg); }
-            25% { transform: rotate(2deg); }
-            75% { transform: rotate(-2deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
             100% { transform: rotate(0deg); }
         }
     </style>
@@ -269,46 +296,45 @@
         <p>Documenting questionable nutritional milestones and dietary regrets.</p>
     </header>
 
-    <!-- Interactive Form -->
     <div class="container">
-        <form id="add-entry-form">
-            <div>
+        <form id="add-entry-form" autocomplete="off">
+            
+            <!-- Upgraded Cafe Input Container -->
+            <div class="form-group">
                 <label for="place-name">Crime Scene</label>
-                <!-- list="cafes-list" links this input to the datalist element below -->
-                <input type="text" id="place-name" list="cafes-list" placeholder="Cafe or Restaurant Name (Pick a past favorite or type a new one...)" required style="width: 100%;">
-                <datalist id="cafes-list"></datalist>
+                <input type="text" id="place-name" placeholder="Where did you do this? (Tap to view past locations)" required>
+                <!-- Custom dropdown panel -->
+                <div id="suggestions-box" class="suggestions-box"></div>
             </div>
             
-            <div>
+            <div class="form-group">
                 <label for="food-item">The Evidence</label>
-                <input type="text" id="food-item" placeholder="What did you shove in your face? (e.g., Double Bacon Greasemonkey)" required style="width: 100%;">
+                <input type="text" id="food-item" placeholder="What did you eat? (e.g., Spicy Double Burger)" required>
             </div>
             
-            <div>
+            <div class="form-group">
                 <label for="rating">Honest Verdict</label>
-                <select id="rating" required style="width: 100%;">
+                <select id="rating" required>
                     <option value="" disabled selected>Rate your momentary life choice...</option>
                     <option value="excellent">Absolute Masterpiece 👑</option>
-                    <option value="good">Pretty Decent (Would eat sober) 👍</option>
-                    <option value="average">Meh, kept me biologically alive 😐</option>
-                    <option value="bad">Deep, profound regret 🤮</option>
+                    <option value="good">Pretty Decent 👍</option>
+                    <option value="average">Meh, kept me alive 😐</option>
+                    <option value="bad">Profound regret 🤮</option>
                 </select>
             </div>
 
-            <div>
+            <div class="form-group">
                 <label for="details">Closing Arguments</label>
-                <textarea id="details" rows="2" placeholder="Any messy details? Overpriced? Terrible service? Stomach rumbles?" style="width: 100%; resize: vertical;"></textarea>
+                <textarea id="details" rows="2" placeholder="Notes for next time? Extra cheese necessary? Garbage service?"></textarea>
             </div>
             
             <button type="submit" id="submit-btn">Log the Damage 📝</button>
-            <button type="button" id="cancel-btn" class="cancel-edit-btn" style="display: none;">Nevermind, keep lying to myself 🛑</button>
+            <button type="button" id="cancel-btn" class="cancel-edit-btn" style="display: none;">Cancel Edit 🛑</button>
         </form>
     </div>
 
-    <!-- Interactive Search Bar -->
-    <input type="text" id="search-input" class="search-bar" placeholder="🔍 Filter your mistakes (search by food, place, or rating)...">
+    <input type="text" id="search-input" class="search-bar" placeholder="🔍 Filter past mistakes...">
 
-    <!-- Dynamically Populated Feed -->
     <div id="food-list">
         <div class="loader-text">Summoning your culinary timeline...</div>
     </div>
@@ -335,16 +361,20 @@
         const cancelBtn = document.getElementById('cancel-btn');
         const listContainer = document.getElementById('food-list');
         const searchInput = document.getElementById('search-input');
-        const cafeDatalist = document.getElementById('cafes-list');
+        
+        // Custom dropdown DOM hooks
+        const placeInput = document.getElementById('place-name');
+        const suggestionsBox = document.getElementById('suggestions-box');
 
         let allEntries = [];
+        let uniqueCafes = [];
         let editDocId = null; 
 
-        // 1. Submit Handlers (Add or Rewrite history)
+        // 1. Submit Handlers
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const place = document.getElementById('place-name').value.trim();
+            const place = placeInput.value.trim();
             const food = document.getElementById('food-item').value.trim();
             const rating = document.getElementById('rating').value;
             const details = document.getElementById('details').value.trim();
@@ -371,40 +401,75 @@
                     });
                     form.reset();
                 }
+                suggestionsBox.style.display = 'none';
             } catch (error) {
                 console.error(error);
-                alert("Firebase rejected your snack. Check console.");
+                alert("Firebase rejected your snack.");
             } finally {
                 submitBtn.disabled = false;
                 if(!editDocId) submitBtn.innerText = "Log the Damage 📝";
             }
         });
 
-        // 2. Continuous Firestore Pipeline
+        // 2. Real-time Firebase Pipeline
         const q = query(collection(db, "eats"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             allEntries = [];
             snapshot.forEach((doc) => {
                 allEntries.push({ id: doc.id, ...doc.data() });
             });
-            updateCafeDropdownOptions(); // Run memory scanner whenever database changes
+            
+            // Build absolute distinct list of cafe locations
+            uniqueCafes = [...new Set(allEntries.map(entry => entry.placeName))]
+                .filter(name => name && name.trim() !== '')
+                .sort((a, b) => a.localeCompare(b));
+
             filterAndRender();
         });
 
-        // 3. Automated Cafe Memory Extractor
-        function updateCafeDropdownOptions() {
-            // Extract all placeNames, filter out duplicates, ignore empty fields, and sort alphabetically
-            const uniqueCafes = [...new Set(allEntries.map(entry => entry.placeName))]
-                .filter(name => name && name.trim() !== '')
-                .sort((a, b) => a.localeCompare(b));
+        // 3. CUSTOM SUGGESTIONS RENDERING LOGIC
+        function showSuggestions(filterText = '') {
+            const searchNormalized = filterText.toLowerCase();
             
-            // Map array into options and inject into datalist
-            cafeDatalist.innerHTML = uniqueCafes
-                .map(cafe => `<option value="${cafe}"></option>`)
+            // Filter unique cafes by what the user typed
+            const matches = uniqueCafes.filter(cafe => 
+                cafe.toLowerCase().includes(searchNormalized)
+            );
+
+            if (matches.length === 0) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            // Generate elements cleanly
+            suggestionsBox.innerHTML = matches
+                .map(cafe => `<div class="suggestion-item">${cafe}</div>`)
                 .join('');
+                
+            suggestionsBox.style.display = 'block';
+
+            // Attach touch/click listeners directly inside items
+            const items = suggestionsBox.querySelectorAll('.suggestion-item');
+            items.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    placeInput.value = e.target.innerText;
+                    suggestionsBox.style.display = 'none';
+                });
+            });
         }
 
-        // 4. UI Card Builder 
+        // Dropdown interactive triggers
+        placeInput.addEventListener('focus', () => showSuggestions(placeInput.value));
+        placeInput.addEventListener('input', (e) => showSuggestions(e.target.value));
+
+        // Closes suggestions if you click anywhere else on the mobile screen
+        document.addEventListener('click', (e) => {
+            if (e.target !== placeInput && e.target !== suggestionsBox) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        // 4. UI Card Builder (Mobile-First Overhaul)
         function renderList(entries) {
             listContainer.innerHTML = ''; 
 
@@ -429,7 +494,7 @@
                     <div class="entry-header">
                         <div>
                             <h3 class="entry-title">${entry.foodItem}</h3>
-                            <span class="entry-place">📍 At ${entry.placeName}</span>
+                            <div class="entry-place">📍 At ${entry.placeName}</div>
                         </div>
                         <span class="badge badge-${ratingTag}">${niceRatingText}</span>
                     </div>
@@ -440,8 +505,9 @@
                     </div>
                 `;
 
+                // Mobile Friendly Edit Event
                 card.querySelector('.edit-btn').addEventListener('click', () => {
-                    document.getElementById('place-name').value = entry.placeName;
+                    placeInput.value = entry.placeName;
                     document.getElementById('food-item').value = entry.foodItem;
                     document.getElementById('rating').value = entry.rating || 'good';
                     document.getElementById('details').value = entry.details || '';
@@ -452,6 +518,7 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
 
+                // Mobile Friendly Confirmed Delete Event
                 card.querySelector('.delete-btn').addEventListener('click', async () => {
                     if (confirm(`Purge "${entry.foodItem}" from history? This won't erase the calories.`)) {
                         try {
@@ -474,6 +541,7 @@
             form.reset();
             submitBtn.innerText = "Log the Damage 📝";
             cancelBtn.style.display = "none";
+            suggestionsBox.style.display = 'none';
         }
 
         function filterAndRender() {
