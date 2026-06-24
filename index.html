@@ -269,11 +269,14 @@
         <p>Documenting questionable nutritional milestones and dietary regrets.</p>
     </header>
 
+    <!-- Interactive Form -->
     <div class="container">
         <form id="add-entry-form">
             <div>
                 <label for="place-name">Crime Scene</label>
-                <input type="text" id="place-name" placeholder="Cafe or Restaurant Name (Where did you do this?)" required style="width: 100%;">
+                <!-- list="cafes-list" links this input to the datalist element below -->
+                <input type="text" id="place-name" list="cafes-list" placeholder="Cafe or Restaurant Name (Pick a past favorite or type a new one...)" required style="width: 100%;">
+                <datalist id="cafes-list"></datalist>
             </div>
             
             <div>
@@ -302,12 +305,15 @@
         </form>
     </div>
 
+    <!-- Interactive Search Bar -->
     <input type="text" id="search-input" class="search-bar" placeholder="🔍 Filter your mistakes (search by food, place, or rating)...">
 
+    <!-- Dynamically Populated Feed -->
     <div id="food-list">
         <div class="loader-text">Summoning your culinary timeline...</div>
     </div>
 
+    <!-- Firebase System Module (v10) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -329,6 +335,7 @@
         const cancelBtn = document.getElementById('cancel-btn');
         const listContainer = document.getElementById('food-list');
         const searchInput = document.getElementById('search-input');
+        const cafeDatalist = document.getElementById('cafes-list');
 
         let allEntries = [];
         let editDocId = null; 
@@ -337,10 +344,10 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const place = document.getElementById('place-name').value;
-            const food = document.getElementById('food-item').value;
+            const place = document.getElementById('place-name').value.trim();
+            const food = document.getElementById('food-item').value.trim();
             const rating = document.getElementById('rating').value;
-            const details = document.getElementById('details').value;
+            const details = document.getElementById('details').value.trim();
 
             submitBtn.disabled = true;
             submitBtn.innerText = "Encrypting data...";
@@ -380,10 +387,24 @@
             snapshot.forEach((doc) => {
                 allEntries.push({ id: doc.id, ...doc.data() });
             });
+            updateCafeDropdownOptions(); // Run memory scanner whenever database changes
             filterAndRender();
         });
 
-        // 3. UI Card Builder 
+        // 3. Automated Cafe Memory Extractor
+        function updateCafeDropdownOptions() {
+            // Extract all placeNames, filter out duplicates, ignore empty fields, and sort alphabetically
+            const uniqueCafes = [...new Set(allEntries.map(entry => entry.placeName))]
+                .filter(name => name && name.trim() !== '')
+                .sort((a, b) => a.localeCompare(b));
+            
+            // Map array into options and inject into datalist
+            cafeDatalist.innerHTML = uniqueCafes
+                .map(cafe => `<option value="${cafe}"></option>`)
+                .join('');
+        }
+
+        // 4. UI Card Builder 
         function renderList(entries) {
             listContainer.innerHTML = ''; 
 
