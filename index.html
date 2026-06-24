@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Food Confessional</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent-primary: #ff4757;
+            --accent-secondary: #00d2d3;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            /* Sarcastic Rating Colors */
+            --excellent: #10b981;
+            --good: #3b82f6;
+            --average: #f59e0b;
+            --bad: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
+        }
+
+        body {
+            font-family: 'Cabinet Grotesk', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.5;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, var(--accent-primary), #ff6b81);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-style: italic;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-secondary);
+            margin-bottom: -8px;
+        }
+
+        input, textarea, select {
+            background: #0f172a;
+            color: var(--text-main);
+            padding: 14px;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.15);
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 16px;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        #submit-btn {
+            background: linear-gradient(135deg, var(--accent-primary), #ff6b81);
+            color: white;
+            box-shadow: 0 4px 14px rgba(255, 71, 87, 0.4);
+        }
+
+        #submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.6);
+        }
+
+        #submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .cancel-edit-btn {
+            background: #475569;
+            color: var(--text-main);
+        }
+
+        .cancel-edit-btn:hover {
+            background: #64748b;
+        }
+
+        .search-bar {
+            width: 100%;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            border: 2px solid #334155;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 4px rgba(0, 210, 211, 0.15);
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border: 1px solid #334155;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .entry-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            border-color: #475569;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .entry-title {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .entry-place {
+            color: var(--accent-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .entry-details {
+            margin: 5px 0 0 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            padding-right: 140px;
+        }
+
+        /* Fun Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .badge-excellent { background-color: var(--excellent); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+        .badge-good { background-color: var(--good); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .badge-average { background-color: var(--average); color: #0f172a; }
+        .badge-bad { background-color: var(--bad); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+
+        /* Actions buttons inside cards */
+        .card-actions {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: var(--text-main);
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .delete-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            animation: shake 0.2s ease-in-out infinite;
+        }
+
+        .loader-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 40px;
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+            100% { transform: rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>The Food Confessional</h1>
+        <p>Documenting questionable nutritional milestones and dietary regrets.</p>
+    </header>
+
+    <div class="container">
+        <form id="add-entry-form">
+            <div>
+                <label for="place-name">Crime Scene</label>
+                <input type="text" id="place-name" placeholder="Cafe or Restaurant Name (Where did you do this?)" required style="width: 100%;">
+            </div>
+            
+            <div>
+                <label for="food-item">The Evidence</label>
+                <input type="text" id="food-item" placeholder="What did you shove in your face? (e.g., Double Bacon Greasemonkey)" required style="width: 100%;">
+            </div>
+            
+            <div>
+                <label for="rating">Honest Verdict</label>
+                <select id="rating" required style="width: 100%;">
+                    <option value="" disabled selected>Rate your momentary life choice...</option>
+                    <option value="excellent">Absolute Masterpiece 👑</option>
+                    <option value="good">Pretty Decent (Would eat sober) 👍</option>
+                    <option value="average">Meh, kept me biologically alive 😐</option>
+                    <option value="bad">Deep, profound regret 🤮</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="details">Closing Arguments</label>
+                <textarea id="details" rows="2" placeholder="Any messy details? Overpriced? Terrible service? Stomach rumbles?" style="width: 100%; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" id="submit-btn">Log the Damage 📝</button>
+            <button type="button" id="cancel-btn" class="cancel-edit-btn" style="display: none;">Nevermind, keep lying to myself 🛑</button>
+        </form>
+    </div>
+
+    <input type="text" id="search-input" class="search-bar" placeholder="🔍 Filter your mistakes (search by food, place, or rating)...">
+
+    <div id="food-list">
+        <div class="loader-text">Summoning your culinary timeline...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJ9K9fQ0ThMB7aXB6qNHr3_yLUdqJgnCM",
+            authDomain: "my-chain-reaction-game.firebaseapp.com",
+            projectId: "my-chain-reaction-game",
+            storageBucket: "my-chain-reaction-game.appspot.com",
+            messagingSenderId: "32751418407",
+            appId: "1:32751418407:web:ff8244007ef2b099d56202"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('add-entry-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const listContainer = document.getElementById('food-list');
+        const searchInput = document.getElementById('search-input');
+
+        let allEntries = [];
+        let editDocId = null; 
+
+        // 1. Submit Handlers (Add or Rewrite history)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const place = document.getElementById('place-name').value;
+            const food = document.getElementById('food-item').value;
+            const rating = document.getElementById('rating').value;
+            const details = document.getElementById('details').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Encrypting data...";
+
+            try {
+                if (editDocId) {
+                    await updateDoc(doc(db, "eats", editDocId), {
+                        placeName: place,
+                        foodItem: food,
+                        rating: rating,
+                        details: details
+                    });
+                    resetFormState();
+                } else {
+                    await addDoc(collection(db, "eats"), {
+                        placeName: place,
+                        foodItem: food,
+                        rating: rating,
+                        details: details,
+                        createdAt: serverTimestamp()
+                    });
+                    form.reset();
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Firebase rejected your snack. Check console.");
+            } finally {
+                submitBtn.disabled = false;
+                if(!editDocId) submitBtn.innerText = "Log the Damage 📝";
+            }
+        });
+
+        // 2. Continuous Firestore Pipeline
+        const q = query(collection(db, "eats"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            allEntries = [];
+            snapshot.forEach((doc) => {
+                allEntries.push({ id: doc.id, ...doc.data() });
+            });
+            filterAndRender();
+        });
+
+        // 3. UI Card Builder 
+        function renderList(entries) {
+            listContainer.innerHTML = ''; 
+
+            if (entries.length === 0) {
+                listContainer.innerHTML = '<div class="loader-text">No matches. Are you currently photosynthesizing? 🌱</div>';
+                return;
+            }
+
+            entries.forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+                
+                const ratingTag = entry.rating || 'good'; 
+                const niceRatingText = {
+                    excellent: "Masterpiece 👑",
+                    good: "Decent 👍",
+                    average: "Survived 😐",
+                    bad: "Regret 🤮"
+                }[ratingTag] || "Decent 👍";
+
+                card.innerHTML = `
+                    <div class="entry-header">
+                        <div>
+                            <h3 class="entry-title">${entry.foodItem}</h3>
+                            <span class="entry-place">📍 At ${entry.placeName}</span>
+                        </div>
+                        <span class="badge badge-${ratingTag}">${niceRatingText}</span>
+                    </div>
+                    ${entry.details ? `<p class="entry-details">“ ${entry.details} ”</p>` : ''}
+                    <div class="card-actions">
+                        <button class="edit-btn">Edit</button>
+                        <button class="delete-btn">Yeet 🗑️</button>
+                    </div>
+                `;
+
+                card.querySelector('.edit-btn').addEventListener('click', () => {
+                    document.getElementById('place-name').value = entry.placeName;
+                    document.getElementById('food-item').value = entry.foodItem;
+                    document.getElementById('rating').value = entry.rating || 'good';
+                    document.getElementById('details').value = entry.details || '';
+                    
+                    editDocId = entry.id;
+                    submitBtn.innerText = "Rewrite History ⏳";
+                    cancelBtn.style.display = "block";
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                card.querySelector('.delete-btn').addEventListener('click', async () => {
+                    if (confirm(`Purge "${entry.foodItem}" from history? This won't erase the calories.`)) {
+                        try {
+                            await deleteDoc(doc(db, "eats", entry.id));
+                            if (editDocId === entry.id) resetFormState();
+                        } catch (e) {
+                            alert("Couldn't yeet item.");
+                        }
+                    }
+                });
+
+                listContainer.appendChild(card);
+            });
+        }
+
+        cancelBtn.addEventListener('click', resetFormState);
+
+        function resetFormState() {
+            editDocId = null;
+            form.reset();
+            submitBtn.innerText = "Log the Damage 📝";
+            cancelBtn.style.display = "none";
+        }
+
+        function filterAndRender() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = allEntries.filter(entry => 
+                entry.foodItem.toLowerCase().includes(searchTerm) ||
+                entry.placeName.toLowerCase().includes(searchTerm) ||
+                (entry.rating || '').toLowerCase().includes(searchTerm)
+            );
+            renderList(filtered);
+        }
+
+        searchInput.addEventListener('input', filterAndRender);
+    </script>
+</body>
+</html>
